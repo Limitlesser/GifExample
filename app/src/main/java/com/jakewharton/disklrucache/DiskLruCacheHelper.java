@@ -24,7 +24,6 @@ import java.io.OutputStreamWriter;
 import java.io.Serializable;
 
 import wind.gifexample.BuildConfig;
-import wind.gifexample.image.Utils;
 
 /**
  * Created by wind on 2016/8/25.

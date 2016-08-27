@@ -1,4 +1,4 @@
-package wind.gifexample.image;
+package com.jakewharton.disklrucache;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;

@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     xmlns:fresco="http://schemas.android.com/apk/res-auto">
 
-    <ImageView
+    <pl.droidsonroids.gif.GifImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="80dp"

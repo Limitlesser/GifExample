@@ -164,12 +164,12 @@ public class MainActivity extends AppCompatActivity {
         public class ViewHolder extends RecyclerView.ViewHolder {
 
             //            SimpleDraweeView imageView;
-            ImageView imageView;
+            GifImageView imageView;
 
             public ViewHolder(View itemView) {
                 super(itemView);
 //                imageView = (SimpleDraweeView) itemView.findViewById(R.id.imageView);
-                imageView = (ImageView) itemView.findViewById(R.id.imageView);
+                imageView = (GifImageView) itemView.findViewById(R.id.imageView);
 
             }
 
@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
 //                        .setAutoPlayAnimations(true)
 //                .build();
 //                imageView.setController(controller);
-                GifImageLoader.getInstance().disPlayGif(imageView, url);
+                GifImageLoader.getInstance().displayGif(imageView, url);
             }
 
 
