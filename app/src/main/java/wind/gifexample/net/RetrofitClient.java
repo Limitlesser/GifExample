@@ -1,11 +1,8 @@
 package wind.gifexample.net;
 
-import java.io.IOException;
-
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.GsonConverterFactory;
 import retrofit2.Retrofit;
@@ -52,19 +49,15 @@ public class RetrofitClient {
     }
 
     private static Interceptor getApiKeyInterceptor() {
-        Interceptor interceptor = new Interceptor() {
-            @Override
-            public Response intercept(Chain chain) throws IOException {
-                Request request = chain.request();
-                Request newRequest = request.newBuilder().url(
-                        request.url()
-                                .newBuilder().addQueryParameter(TenorApi.API_KEY, TenorApi.API_KEY_VALUE)
-                                .build()
-                ).build();
-                return chain.proceed(newRequest);
-            }
+        return chain -> {
+            Request request = chain.request();
+            Request newRequest = request.newBuilder().url(
+                    request.url()
+                            .newBuilder().addQueryParameter(TenorApi.API_KEY, TenorApi.API_KEY_VALUE)
+                            .build()
+            ).build();
+            return chain.proceed(newRequest);
         };
-        return interceptor;
     }
 
 }

@@ -28,10 +28,14 @@ public interface TenorApi {
      */
     @GET("search")
     Observable<GifResult> searchGif(@Query("tag") String tag,
-                                    @Query("pos") Integer pos,
+                                    @Query("pos") String pos,
                                     @Query("limit") Integer limit,
                                     @Query("country") String country,
                                     @Query("locale") String locale);
+
+    @GET("trending")
+    Observable<GifResult> trending(@Query("pos") String pos,
+                                   @Query("limit") Integer limit);
 
 
 }

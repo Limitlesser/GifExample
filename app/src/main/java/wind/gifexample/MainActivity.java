@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
     EndlessRecyclerViewAdapter endlessAdapter;
 
-    int offset = 0;
+    String pos;
 
     int limit = 30;
 
@@ -57,12 +58,7 @@ public class MainActivity extends AppCompatActivity {
         GridLayoutManager layoutManager = new GridLayoutManager(this, 3);
         recyclerView.setLayoutManager(layoutManager);
         mAdapter = new GifAdapter();
-        endlessAdapter = new EndlessRecyclerViewAdapter(this, mAdapter, new EndlessRecyclerViewAdapter.RequestToLoadMoreListener() {
-            @Override
-            public void onLoadMoreRequested() {
-                loadMore();
-            }
-        }, R.layout.item_loading, false);
+        endlessAdapter = new EndlessRecyclerViewAdapter(this, mAdapter, this::loadMore, R.layout.item_loading, false);
         layoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
@@ -71,37 +67,45 @@ public class MainActivity extends AppCompatActivity {
         });
         recyclerView.setAdapter(endlessAdapter);
 
-        search("hello");
+        trending();
     }
 
     private void search(String keyword) {
         RetrofitClient.getTenorApi()
-                .searchGif(this.keyword = keyword, offset = 0, limit, Locale.getDefault().getCountry(), Locale.getDefault().getLanguage())
+                .searchGif(this.keyword = keyword, pos, limit, Locale.getDefault().getCountry(), Locale.getDefault().getLanguage())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<GifResult>() {
-                    @Override
-                    public void call(GifResult gifResult) {
-                        mAdapter.setGifResult(gifResult.getResults());
-                        endlessAdapter.restartAppending();
-                    }
+                .subscribe(gifResult -> {
+                    pos = gifResult.getNext();
+                    mAdapter.setGifResult(gifResult.getResults());
+                    endlessAdapter.restartAppending();
+                });
+    }
+
+    private void trending() {
+        RetrofitClient.getTenorApi()
+                .trending(pos, limit)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(gifResult -> {
+                    pos = gifResult.getNext();
+                    mAdapter.setGifResult(gifResult.getResults());
+                    endlessAdapter.restartAppending();
                 });
     }
 
     private void loadMore() {
         RetrofitClient.getTenorApi()
-                .searchGif(keyword, offset += limit, limit, Locale.getDefault().getCountry(), Locale.getDefault().getLanguage())
+                .searchGif(keyword, pos, limit, Locale.getDefault().getCountry(), Locale.getDefault().getLanguage())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<GifResult>() {
-                    @Override
-                    public void call(GifResult gifResult) {
-                        mAdapter.addGifReslut(gifResult.getResults());
-                        if (gifResult.getResults().size() > 0) {
-                            endlessAdapter.onDataReady(true);
-                        } else {
-                            endlessAdapter.onDataReady(false);
-                        }
+                .subscribe(gifResult -> {
+                    pos = gifResult.getNext();
+                    mAdapter.addGifReslut(gifResult.getResults());
+                    if (gifResult.getResults().size() > 0) {
+                        endlessAdapter.onDataReady(true);
+                    } else {
+                        endlessAdapter.onDataReady(false);
                     }
                 });
     }
@@ -116,7 +120,12 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.search:
-                search(editText.getText().toString());
+                String s = editText.getText().toString();
+                if (!TextUtils.isEmpty(s)) {
+                    search(editText.getText().toString());
+                } else {
+                    trending();
+                }
                 return true;
         }
         return super.onOptionsItemSelected(item);
